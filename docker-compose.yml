@@ -32,7 +32,7 @@ services:
     ports:
       #- '3000:3000/tcp'
       # NOTE: if you're using HTTP, you can use the following port mapping
-      - '80:3000/tcp'
+      - '84:3000/tcp'
       # NOTE: if you're using HTTPS, you can use the following port mapping
       #- '443:3000/tcp'
 
