@@ -15,7 +15,7 @@ services:
     #
     # Image
     #
-    image: devlikeapro/waha-plus:latest # or devlikeapro/waha:latest if you're using WAHA Core
+    image: devlikeapro/waha:latest # or devlikeapro/waha:latest if you're using WAHA Core
     #
     # We strongly recommend using the pinned version of WAHA
     # https://waha.devlike.pro/docs/how-to/engines/#versions
@@ -68,17 +68,17 @@ services:
       - WHATSAPP_API_KEY=321
       - WAHA_DASHBOARD_USERNAME=waha
       - WAHA_DASHBOARD_PASSWORD=waha
-      #- WHATSAPP_SWAGGER_USERNAME=admin
-      #- WHATSAPP_SWAGGER_PASSWORD=admin
+      - WHATSAPP_SWAGGER_USERNAME=admin
+      - WHATSAPP_SWAGGER_PASSWORD=admin
 
       #
       # Dashboard
       #
       # https://waha.devlike.pro/docs/how-to/waha-dashboard/#configuration
       # Enabled by default
-      #- WAHA_DASHBOARD_ENABLED=true
-      #- WAHA_DASHBOARD_USERNAME=waha
-      #- WAHA_DASHBOARD_PASSWORD=waha
+      - WAHA_DASHBOARD_ENABLED=true
+      - WAHA_DASHBOARD_USERNAME=waha
+      - WAHA_DASHBOARD_PASSWORD=waha
 
       #
       # Logging
@@ -89,8 +89,8 @@ services:
       #- WAHA_LOG_FORMAT=JSON
       - WAHA_LOG_LEVEL=info
       # If you want to see more logs, you can set the log level to debug
-      #- WAHA_LOG_LEVEL=debug
-      # DEBUG=1 # shortcut for setting log level to debug
+      - WAHA_LOG_LEVEL=debug
+       DEBUG=1 # shortcut for setting log level to debug
 
       #
       # Engine
