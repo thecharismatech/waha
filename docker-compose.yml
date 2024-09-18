@@ -34,7 +34,7 @@ services:
       # NOTE: if you're using HTTP, you can use the following port mapping
       # - '84:3000/tcp'
       # NOTE: if you're using HTTPS, you can use the following port mapping
-      - '85:3000/tcp'
+      - '84:3344/tcp'
 
     volumes:
       # Store sessions in the .sessions folder (comment it if you're using MongoDB)
@@ -57,7 +57,7 @@ services:
       # If you know the right URL, you can use it here.
       # Use any port in WHATSAPP_API_PORT and domain in WHATSAPP_API_HOSTNAME
       # https://waha.devlike.pro/docs/how-to/config/#common
-      - WHATSAPP_API_PORT=3000
+      - WHATSAPP_API_PORT=3344
       - WHATSAPP_API_HOSTNAME=localhost
 
       #
