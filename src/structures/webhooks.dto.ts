@@ -107,6 +107,15 @@ export class WAHAWebhook {
   session: string;
 
   @ApiProperty({
+    example: {
+      'user.id': '123',
+      'user.email': 'email@example.com',
+    },
+    description: 'Metadata for the session.',
+  })
+  metadata?: Map<string, string>;
+
+  @ApiProperty({
     example: WAHAEngine.WEBJS,
   })
   engine: WAHAEngine;
@@ -123,7 +132,7 @@ export class WAHAWebhook {
     | object;
 }
 
-class WAHAWebhookSessionStatus extends WAHAWebhook {
+export class WAHAWebhookSessionStatus extends WAHAWebhook {
   @ApiProperty({
     description: 'The event is triggered when the session status changes.',
   })

@@ -11,10 +11,10 @@ import { LoggerErrorInterceptor } from 'nestjs-pino';
 import { Logger } from 'pino';
 import pino from 'pino';
 
-import { AllExceptionsFilter } from './api/exception.filter';
 import { WhatsappConfigService } from './config.service';
 import { AppModuleCore } from './core/app.module.core';
 import { SwaggerConfiguratorCore } from './core/SwaggerConfiguratorCore';
+import { AllExceptionsFilter } from './nestjs/AllExceptionsFilter';
 import { WAHA_WEBHOOKS } from './structures/webhooks.dto';
 import { getWAHAVersion, VERSION, WAHAVersion } from './version';
 
@@ -23,7 +23,7 @@ const logger: Logger = pino({
   transport: getPinoTransport(),
 }).child({ name: 'Bootstrap' });
 
-logger.info('NODE - Catching unhandled exceptions enabled');
+logger.info('NODE - Catching unhandled rejection enabled');
 process.on('unhandledRejection', (reason, promise) => {
   logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
   // @ts-ignore
@@ -34,7 +34,6 @@ async function loadModules(): Promise<
   [typeof AppModuleCore, typeof SwaggerConfiguratorCore]
 > {
   const version = getWAHAVersion();
-  logger.info(`WAHA (WhatsApp HTTP API) - Running ${version} version...`);
 
   if (version === WAHAVersion.CORE) {
     const { AppModuleCore } = await import('./core/app.module.core');
@@ -52,10 +51,18 @@ async function loadModules(): Promise<
   return [AppModulePlus, SwaggerConfiguratorPlus];
 }
 
+let app = undefined;
+
+export function getApp() {
+  return app;
+}
+
 async function bootstrap() {
+  const version = getWAHAVersion();
+  logger.info(`WAHA (WhatsApp HTTP API) - Running ${version} version...`);
   const [AppModule, SwaggerModule] = await loadModules();
   const httpsOptions = AppModule.getHttpsOptions(logger);
-  const app = await NestFactory.create(AppModule, {
+  app = await NestFactory.create(AppModule, {
     logger: getNestJSLogLevels(),
     httpsOptions: httpsOptions,
     bufferLogs: true,
@@ -89,4 +96,9 @@ async function bootstrap() {
   logger.info(VERSION, 'Environment');
 }
 
-bootstrap();
+bootstrap().catch((error) => {
+  logger.error(error, `Failed to start WAHA: ${error}`);
+  // @ts-ignore
+  logger.error(error.stack);
+  process.exit(1);
+});

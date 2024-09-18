@@ -24,13 +24,12 @@ export class SwaggerConfiguratorCore {
       '<br/>' +
       'Learn more:' +
       '<ul>' +
+      '<li><a href="/dashboard">WAHA Dashboard</a></li>' +
       '<li><a href="https://waha.devlike.pro/" target="_blank">Documentation</a></li>' +
       '<li><a href="https://waha.devlike.pro/docs/how-to/engines/#features" target="_blank">Supported features in engines</a></li>' +
       '<li><a href="https://github.com/devlikeapro/waha" target="_blank">GitHub - WAHA Core</a></li>' +
       '<li><a href="https://github.com/devlikeapro/waha-plu' + // Separate line to pass pre-commit check
       's" target="_blank">GitHub - WAHA Plus</a></li>' +
-      '<li><b>NEW!</b> - <a href="/dashboard">WAHA Dashboard</a></li>' +
-      '<li><b>NEW!</b> - <a href="https://waha.devlike.pro/docs/how-to/waha-dashboard">WAHA Dashboard Documentation</a></li>' +
       '</ul>' +
       '<p>Support the project and get WAHA Plus version!</p>' +
       '<ul>' +
@@ -56,29 +55,30 @@ export class SwaggerConfiguratorCore {
       .setDescription(this.description)
       .setExternalDoc(this.title, this.externalDocUrl)
       .setVersion(VERSION.version)
-      .addTag('sessions', 'Control WhatsApp sessions')
-      .addTag('auth', 'Authentication')
-      .addTag('screenshot', 'Get screenshot of WhatsApp and show QR code')
-      .addTag('chatting', 'Chatting methods')
-      .addTag('channels', 'Channels (newsletters) methods')
+      .addTag('🖥️ Sessions', 'Control WhatsApp sessions (accounts)')
+      .addTag('🔑 Auth', 'Authentication')
+      .addTag('🖼️ Screenshot', 'Get screenshot of WhatsApp and show QR code')
+      .addTag('📤 Chatting', 'Chatting methods')
+      .addTag('📢 Channels', 'Channels (newsletters) methods')
       .addTag(
-        'status',
+        '🟢 Status',
         'Status (aka stories) methods. <b>NOWEB</b> engine only!',
       )
-      .addTag('chats', `Chats methods`)
+      .addTag('💬 Chats', `Chats methods`)
       .addTag(
-        'contacts',
+        '👤 Contacts',
         `Contacts methods.<br>
                 Use phone number (without +) or phone number and \`@c.us\` at the end as \`contactId\`.<br>
                 'E.g: \`12312312310\` OR \`12312312310@c.us\`<br>`,
       )
-      .addTag('groups', `Groups methods.<br>`)
-      .addTag('presence', `Presence information`)
+      .addTag('👥 Groups', `Groups methods.<br>`)
+      .addTag('✅ Presence', `Presence information`)
       .addTag(
-        'labels',
+        '🏷️ Labels',
         'Labels - available only for WhatsApp Business accounts',
       )
-      .addTag('other', 'Other methods')
+      .addTag('🔍 Observability', 'Other methods')
+      .addTag('🗄️ Storage', 'Storage methods')
       .addApiKey({
         type: 'apiKey',
         description: 'Your secret api key',

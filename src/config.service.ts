@@ -1,18 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { WAHAEvents } from '@waha/structures/enums.dto';
 
 import { parseBool } from './helpers';
 import { WebhookConfig } from './structures/webhooks.config.dto';
 
 @Injectable()
 export class WhatsappConfigService {
-  public filesUri = '/api/files';
-  public schema = 'http';
-
   constructor(private configService: ConfigService) {}
 
-  get filesURL(): string {
-    return `${this.schema}://${this.hostname}:${this.port}${this.filesUri}/`;
+  get schema() {
+    return this.configService.get('WHATSAPP_API_SCHEMA', 'http');
   }
 
   get hostname(): string {
@@ -21,17 +19,6 @@ export class WhatsappConfigService {
 
   get port(): string {
     return this.configService.get('WHATSAPP_API_PORT', '3000');
-  }
-
-  get filesFolder(): string {
-    return this.configService.get(
-      'WHATSAPP_FILES_FOLDER',
-      '/tmp/whatsapp-files',
-    );
-  }
-
-  get filesLifetime(): number {
-    return this.configService.get<number>('WHATSAPP_FILES_LIFETIME', 180);
   }
 
   get mimetypes(): string[] {
@@ -64,8 +51,11 @@ export class WhatsappConfigService {
   }
 
   get proxyServer(): string[] | string | undefined {
-    const single = this.configService.get('WHATSAPP_PROXY_SERVER', undefined);
-    const multipleValues = this.configService.get(
+    const single = this.configService.get<string>(
+      'WHATSAPP_PROXY_SERVER',
+      undefined,
+    );
+    const multipleValues = this.configService.get<string>(
       'WHATSAPP_PROXY_SERVER_LIST',
       undefined,
     );
@@ -101,7 +91,7 @@ export class WhatsappConfigService {
     return this.get('WHATSAPP_HOOK_URL');
   }
 
-  private getWebhookEvents(): string[] {
+  private getWebhookEvents(): WAHAEvents[] {
     const value = this.get('WHATSAPP_HOOK_EVENTS', '');
     return value ? value.split(',') : [];
   }
@@ -145,5 +135,10 @@ export class WhatsappConfigService {
       'WHATSAPP_HEALTH_MONGO_TIMEOUT_MS',
       3000,
     );
+  }
+
+  get debugModeEnabled(): boolean {
+    const value = this.configService.get('WAHA_DEBUG_MODE', 'false');
+    return parseBool(value);
   }
 }

@@ -1,5 +1,7 @@
-import * as fs from 'fs/promises';
-import * as path from 'path';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const fs = require('fs-extra');
+
+import { fileExists } from '@waha/utils/files';
 
 import { SessionConfig } from '../../structures/sessions.dto';
 import { ISessionConfigRepository } from './ISessionConfigRepository';
@@ -14,11 +16,13 @@ export class LocalSessionConfigRepository extends ISessionConfigRepository {
     this.store = store;
   }
 
-  private async fileExists(filepath: string) {
-    try {
-      await fs.access(filepath, fs.constants.F_OK);
-    } catch (error) {
-      return false;
+  async exists(sessionName: string): Promise<boolean> {
+    const filepath = this.getFilePath(sessionName);
+    const exists = await fileExists(filepath);
+    if (!exists) {
+      // check directory exist for empty config sessions
+      const folder = this.store.getSessionDirectory(sessionName);
+      return await fileExists(folder);
     }
     return true;
   }
@@ -26,7 +30,7 @@ export class LocalSessionConfigRepository extends ISessionConfigRepository {
   async get(sessionName: string): Promise<SessionConfig | null> {
     const filepath = this.getFilePath(sessionName);
     // Check file exists
-    if (!(await this.fileExists(filepath))) {
+    if (!(await fileExists(filepath))) {
       return null;
     }
 
@@ -56,10 +60,17 @@ export class LocalSessionConfigRepository extends ISessionConfigRepository {
   }
 
   async delete(sessionName: string): Promise<void> {
-    const filepath = this.getFilePath(sessionName);
-    if (!(await this.fileExists(filepath))) {
-      return;
-    }
-    await fs.unlink(filepath);
+    const sessionDirectory = this.store.getSessionDirectory(sessionName);
+    await fs.remove(sessionDirectory);
+  }
+
+  async getAll(): Promise<string[]> {
+    await this.store.init();
+    const content = await fs.readdir(this.store.getEngineDirectory(), {
+      withFileTypes: true,
+    });
+    return content
+      .filter((dirent) => dirent.isDirectory())
+      .map((dirent) => dirent.name);
   }
 }

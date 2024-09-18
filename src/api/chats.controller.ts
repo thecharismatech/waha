@@ -11,22 +11,22 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
+import { ChatIdApiParam } from '@waha/nestjs/params/ChatIdApiParam';
+import { MessageIdApiParam } from '@waha/nestjs/params/MessageIdApiParam';
+import {
+  SessionApiParam,
+  WorkingSessionParam,
+} from '@waha/nestjs/params/SessionApiParam';
 
 import { SessionManager } from '../core/abc/manager.abc';
 import { WhatsappSession } from '../core/abc/session.abc';
 import { parseBool } from '../helpers';
 import { GetChatMessagesQuery, GetChatsQuery } from '../structures/chats.dto';
 import { EditMessageRequest } from '../structures/chatting.dto';
-import {
-  ChatIdApiParam,
-  MessageIdApiParam,
-  SessionApiParam,
-  SessionParam,
-} from './helpers';
 
 @ApiSecurity('api_key')
 @Controller('api/:session/chats')
-@ApiTags('chats')
+@ApiTags('💬 Chats')
 @UsePipes(new ValidationPipe({ transform: true }))
 class ChatsController {
   constructor(private manager: SessionManager) {}
@@ -35,7 +35,7 @@ class ChatsController {
   @SessionApiParam
   @ApiOperation({ summary: 'Get chats' })
   getChats(
-    @SessionParam session: WhatsappSession,
+    @WorkingSessionParam session: WhatsappSession,
     @Query() query: GetChatsQuery,
   ) {
     return session.getChats(query);
@@ -44,8 +44,9 @@ class ChatsController {
   @Delete(':chatId')
   @SessionApiParam
   @ApiOperation({ summary: 'Deletes the chat' })
+  @ChatIdApiParam
   deleteChat(
-    @SessionParam session: WhatsappSession,
+    @WorkingSessionParam session: WhatsappSession,
     @Param('chatId') chatId: string,
   ) {
     return session.deleteChat(chatId);
@@ -54,9 +55,10 @@ class ChatsController {
   @Get(':chatId/messages')
   @SessionApiParam
   @ApiOperation({ summary: 'Gets messages in the chat' })
+  @ChatIdApiParam
   getChatMessages(
     @Query() query: GetChatMessagesQuery,
-    @SessionParam session: WhatsappSession,
+    @WorkingSessionParam session: WhatsappSession,
     @Param('chatId') chatId: string,
   ) {
     const downloadMedia = parseBool(query.downloadMedia);
@@ -66,8 +68,9 @@ class ChatsController {
   @Delete(':chatId/messages')
   @SessionApiParam
   @ApiOperation({ summary: 'Clears all messages from the chat' })
+  @ChatIdApiParam
   clearMessages(
-    @SessionParam session: WhatsappSession,
+    @WorkingSessionParam session: WhatsappSession,
     @Param('chatId') chatId: string,
   ) {
     return session.clearMessages(chatId);
@@ -79,7 +82,7 @@ class ChatsController {
   @MessageIdApiParam
   @ApiOperation({ summary: 'Deletes a message from the chat' })
   deleteMessage(
-    @SessionParam session: WhatsappSession,
+    @WorkingSessionParam session: WhatsappSession,
     @Param('chatId') chatId: string,
     @Param('messageId') messageId: string,
   ) {
@@ -92,7 +95,7 @@ class ChatsController {
   @MessageIdApiParam
   @ApiOperation({ summary: 'Edits a message in the chat' })
   editMessage(
-    @SessionParam session: WhatsappSession,
+    @WorkingSessionParam session: WhatsappSession,
     @Param('chatId') chatId: string,
     @Param('messageId') messageId: string,
     @Body() body: EditMessageRequest,
@@ -105,7 +108,7 @@ class ChatsController {
   @ChatIdApiParam
   @ApiOperation({ summary: 'Archive the chat' })
   archiveChat(
-    @SessionParam session: WhatsappSession,
+    @WorkingSessionParam session: WhatsappSession,
     @Param('chatId') chatId: string,
   ) {
     return session.chatsArchiveChat(chatId);
@@ -116,7 +119,7 @@ class ChatsController {
   @ChatIdApiParam
   @ApiOperation({ summary: 'Unarchive the chat' })
   unarchiveChat(
-    @SessionParam session: WhatsappSession,
+    @WorkingSessionParam session: WhatsappSession,
     @Param('chatId') chatId: string,
   ) {
     return session.chatsUnarchiveChat(chatId);

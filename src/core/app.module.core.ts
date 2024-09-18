@@ -1,17 +1,23 @@
-import { ConsoleLogger, INestApplication, Module } from '@nestjs/common';
+import { INestApplication, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { PassportModule } from '@nestjs/passport';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { TerminusModule } from '@nestjs/terminus';
-import { BufferJsonReplacerInterceptor } from '@waha/api/BufferJsonReplacerInterceptor';
 import { ChannelsController } from '@waha/api/channels.controller';
+import {
+  ServerController,
+  ServerDebugController,
+} from '@waha/api/server.controller';
 import { WebsocketGatewayCore } from '@waha/core/api/websocket.gateway.core';
+import { MediaLocalStorageConfig } from '@waha/core/media/local/MediaLocalStorageConfig';
+import { BufferJsonReplacerInterceptor } from '@waha/nestjs/BufferJsonReplacerInterceptor';
 import {
   getPinoHttpUseLevel,
   getPinoLogLevel,
   getPinoTransport,
 } from '@waha/utils/logging';
+import * as Joi from 'joi';
 import { LoggerModule } from 'nestjs-pino';
 import { join } from 'path';
 import { Logger } from 'pino';
@@ -26,10 +32,7 @@ import { LabelsController } from '../api/labels.controller';
 import { PingController } from '../api/ping.controller';
 import { PresenceController } from '../api/presence.controller';
 import { ScreenshotController } from '../api/screenshot.controller';
-import {
-  SessionController,
-  SessionsController,
-} from '../api/sessions.controller';
+import { SessionsController } from '../api/sessions.controller';
 import { StatusController } from '../api/status.controller';
 import { VersionController } from '../api/version.controller';
 import { WhatsappConfigService } from '../config.service';
@@ -51,7 +54,11 @@ export const IMPORTS = [
       transport: getPinoTransport(),
       autoLogging: {
         ignore: (req) => {
-          return req.url.startsWith('/dashboard/');
+          return (
+            req.url.startsWith('/dashboard/') ||
+            req.url.startsWith('/api/files/') ||
+            req.url.startsWith('/api/s3/')
+          );
         },
       },
       serializers: {
@@ -70,29 +77,24 @@ export const IMPORTS = [
   }),
   ConfigModule.forRoot({
     isGlobal: true,
+    validationSchema: Joi.object({
+      WHATSAPP_API_SCHEMA: Joi.string().valid('http', 'https').default('http'),
+    }),
   }),
   ServeStaticModule.forRootAsync({
     imports: [],
-    extraProviders: [WhatsappConfigService, DashboardConfigServiceCore],
-    inject: [WhatsappConfigService, DashboardConfigServiceCore],
-    useFactory: (
-      config: WhatsappConfigService,
-      dashboardConfig: DashboardConfigServiceCore,
-    ) => {
-      const options = [
-        // Serve files (media)
+    extraProviders: [DashboardConfigServiceCore],
+    inject: [DashboardConfigServiceCore],
+    useFactory: (dashboardConfig: DashboardConfigServiceCore) => {
+      if (!dashboardConfig.enabled) {
+        return [];
+      }
+      return [
         {
-          rootPath: config.filesFolder,
-          serveRoot: config.filesUri,
-        },
-      ];
-      if (dashboardConfig.enabled) {
-        options.push({
           rootPath: join(__dirname, '..', 'dashboard'),
           serveRoot: dashboardConfig.dashboardUri,
-        });
-      }
-      return options;
+        },
+      ];
     },
   }),
   PassportModule,
@@ -101,7 +103,6 @@ export const IMPORTS = [
 export const CONTROLLERS = [
   AuthController,
   SessionsController,
-  SessionController,
   ChattingController,
   ChatsController,
   ChannelsController,
@@ -111,9 +112,11 @@ export const CONTROLLERS = [
   GroupsController,
   PresenceController,
   ScreenshotController,
-  VersionController,
-  HealthController,
   PingController,
+  HealthController,
+  ServerController,
+  ServerDebugController,
+  VersionController,
 ];
 const PROVIDERS = [
   {
@@ -132,8 +135,8 @@ const PROVIDERS = [
   SwaggerConfigServiceCore,
   WhatsappConfigService,
   EngineConfigService,
-  ConsoleLogger,
   WebsocketGatewayCore,
+  MediaLocalStorageConfig,
 ];
 
 @Module({
@@ -142,7 +145,11 @@ const PROVIDERS = [
   providers: PROVIDERS,
 })
 export class AppModuleCore {
-  constructor(protected config: WhatsappConfigService) {}
+  public startTimestamp: number;
+
+  constructor(protected config: WhatsappConfigService) {
+    this.startTimestamp = Date.now();
+  }
 
   static getHttpsOptions(logger: Logger) {
     return undefined;

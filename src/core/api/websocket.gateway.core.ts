@@ -1,6 +1,5 @@
 import {
   BeforeApplicationShutdown,
-  ConsoleLogger,
   Logger,
   LoggerService,
 } from '@nestjs/common';
@@ -13,9 +12,10 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { SessionManager } from '@waha/core/abc/manager.abc';
+import { WebsocketHeartbeatJob } from '@waha/nestjs/ws/WebsocketHeartbeatJob';
+import { WebSocket } from '@waha/nestjs/ws/ws';
 import { WAHAEvents } from '@waha/structures/enums.dto';
-import { WebsocketHeartbeatJob } from '@waha/utils/WebsocketHeartbeatJob';
-import { WebSocket } from '@waha/utils/ws';
+import { generatePrefixedId } from '@waha/utils/ids';
 import { IncomingMessage } from 'http';
 import * as lodash from 'lodash';
 import * as url from 'url';
@@ -52,8 +52,8 @@ export class WebsocketGatewayCore
   }
 
   handleConnection(socket: WebSocket, request: IncomingMessage, ...args): any {
-    const random = Math.random().toString(36).substring(7);
-    const id = `wsc_${random}`;
+    // wsc - websocket client
+    const id = generatePrefixedId('wsc');
     socket.id = id;
     this.logger.debug(`New client connected: ${request.url}`);
     const params = this.getParams(id, request, socket);
@@ -105,12 +105,15 @@ export class WebsocketGatewayCore
     this.logger.log('Shutting down websocket server');
     // Allow pending messages to be sent, it can be even 1ms, just to release the event loop
     await sleep(100);
-    this.server.clients.forEach((options, client) => {
+    this.server?.clients.forEach((options, client) => {
+      // @ts-ignore
+      this.logger.debug(`Closing client connection - ${client.id}...`);
       client.close(1001, 'Server is shutting down');
     });
     // Do not turn off heartbeat service here,
     // it's responsible for terminating the connection that is not alive
     this.logger.log('Websocket server is down');
+    this.heartbeat?.stop();
   }
 
   afterInit(server: Server) {

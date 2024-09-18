@@ -7,6 +7,11 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
+import { ChatIdApiParam } from '@waha/nestjs/params/ChatIdApiParam';
+import {
+  SessionApiParam,
+  WorkingSessionParam,
+} from '@waha/nestjs/params/SessionApiParam';
 
 import { SessionManager } from '../core/abc/manager.abc';
 import { WhatsappSession } from '../core/abc/session.abc';
@@ -15,11 +20,10 @@ import {
   WAHAChatPresences,
   WAHASessionPresence,
 } from '../structures/presence.dto';
-import { SessionApiParam, SessionParam } from './helpers';
 
 @ApiSecurity('api_key')
 @Controller('api/:session/presence')
-@ApiTags('presence')
+@ApiTags('✅ Presence')
 export class PresenceController {
   constructor(private manager: SessionManager) {}
 
@@ -27,7 +31,7 @@ export class PresenceController {
   @SessionApiParam
   @ApiOperation({ summary: 'Set session presence' })
   setPresence(
-    @SessionParam session: WhatsappSession,
+    @WorkingSessionParam session: WhatsappSession,
     @Body() request: WAHASessionPresence,
   ) {
     // Validate request
@@ -57,19 +61,20 @@ export class PresenceController {
   @SessionApiParam
   @ApiOperation({ summary: 'Get all subscribed presence information.' })
   getPresenceAll(
-    @SessionParam session: WhatsappSession,
+    @WorkingSessionParam session: WhatsappSession,
   ): Promise<WAHAChatPresences[]> {
     return session.getPresences();
   }
 
   @Get(':chatId')
   @SessionApiParam
+  @ChatIdApiParam
   @ApiOperation({
     summary:
       "Get the presence for the chat id. If it hasn't been subscribed - it also subscribes to it.",
   })
   getPresence(
-    @SessionParam session: WhatsappSession,
+    @WorkingSessionParam session: WhatsappSession,
     @Param('chatId') chatId: string,
   ): Promise<WAHAChatPresences> {
     return session.getPresence(chatId);
@@ -77,11 +82,12 @@ export class PresenceController {
 
   @Post(':chatId/subscribe')
   @SessionApiParam
+  @ChatIdApiParam
   @ApiOperation({
     summary: 'Subscribe to presence events for the chat.',
   })
   subscribe(
-    @SessionParam session: WhatsappSession,
+    @WorkingSessionParam session: WhatsappSession,
     @Param('chatId') chatId: string,
   ): Promise<void> {
     return session.subscribePresence(chatId);

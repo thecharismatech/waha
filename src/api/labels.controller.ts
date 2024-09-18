@@ -1,29 +1,34 @@
 import { Body, Controller, Get, Param, Put } from '@nestjs/common';
 import { ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
-import { SessionApiParam, SessionParam } from '@waha/api/helpers';
 import { WhatsappSession } from '@waha/core/abc/session.abc';
-import { Label, LabelID, SetLabelsRequest } from '@waha/structures/labels.dto';
+import { ChatIdApiParam } from '@waha/nestjs/params/ChatIdApiParam';
+import {
+  SessionApiParam,
+  WorkingSessionParam,
+} from '@waha/nestjs/params/SessionApiParam';
+import { Label, SetLabelsRequest } from '@waha/structures/labels.dto';
 
 import { SessionManager } from '../core/abc/manager.abc';
 
 @ApiSecurity('api_key')
 @Controller('api/:session/labels')
-@ApiTags('labels')
+@ApiTags('🏷️ Labels')
 export class LabelsController {
   constructor(private manager: SessionManager) {}
 
   @Get('/')
   @SessionApiParam
   @ApiOperation({ summary: 'Get all labels' })
-  getAll(@SessionParam session: WhatsappSession): Promise<Label[]> {
+  getAll(@WorkingSessionParam session: WhatsappSession): Promise<Label[]> {
     return session.getLabels();
   }
 
   @Get('/chats/:chatId')
   @SessionApiParam
+  @ChatIdApiParam
   @ApiOperation({ summary: 'Get labels for the chat' })
   getChatLabels(
-    @SessionParam session: WhatsappSession,
+    @WorkingSessionParam session: WhatsappSession,
     @Param('chatId') chatId: string,
   ): Promise<Label[]> {
     return session.getChatLabels(chatId);
@@ -31,9 +36,10 @@ export class LabelsController {
 
   @Put('/chats/:chatId')
   @SessionApiParam
+  @ChatIdApiParam
   @ApiOperation({ summary: 'Save labels for the chat' })
   putChatLabels(
-    @SessionParam session: WhatsappSession,
+    @WorkingSessionParam session: WhatsappSession,
     @Param('chatId') chatId: string,
     @Body() request: SetLabelsRequest,
   ) {
@@ -44,7 +50,7 @@ export class LabelsController {
   @SessionApiParam
   @ApiOperation({ summary: 'Get chats by label' })
   getChatsByLabel(
-    @SessionParam session: WhatsappSession,
+    @WorkingSessionParam session: WhatsappSession,
     @Param('labelId') labelId: string,
   ) {
     return session.getChatsByLabelId(labelId);

@@ -56,9 +56,9 @@ import {
 } from '../../structures/status.dto';
 import { WASessionStatusBody } from '../../structures/webhooks.dto';
 import { NotImplementedByEngineError } from '../exceptions';
+import { IMediaManager } from '../media/IMediaManager';
 import { QR } from '../QR';
 import { DataStore } from './DataStore';
-import { MediaManager } from './media.abc';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const qrcode = require('qrcode-terminal');
@@ -88,7 +88,7 @@ export enum WAHAInternalEvent {
 export interface SessionParams {
   name: string;
   printQR: boolean;
-  mediaManager: MediaManager;
+  mediaManager: IMediaManager;
   loggerBuilder: LoggerBuilder;
   sessionStore: DataStore;
   proxyConfig?: ProxyConfig;
@@ -101,7 +101,7 @@ export abstract class WhatsappSession {
   public engine: WAHAEngine;
 
   public name: string;
-  protected mediaManager: MediaManager;
+  protected mediaManager: IMediaManager;
   public loggerBuilder: LoggerBuilder;
   protected logger: Logger;
   protected sessionStore: DataStore;
@@ -152,29 +152,46 @@ export abstract class WhatsappSession {
     // Run optimized version of Chrome
     // References:
     // https://github.com/pedroslopez/whatsapp-web.js/issues/1420
+    // https://github.com/wppconnect-team/wppconnect/issues/1326
     // https://www.bannerbear.com/blog/ways-to-speed-up-puppeteer-screenshots/
     return [
-      '--no-sandbox',
+      '--aggressive-cache-discard',
+      '--disable-accelerated-2d-canvas',
+      '--disable-application-cache',
+      '--disable-background-networking',
+      '--disable-cache',
       '--disable-client-side-phishing-detection',
-      '--disable-setuid-sandbox',
       '--disable-component-update',
       '--disable-default-apps',
-      '--disable-popup-blocking',
-      '--disable-offer-store-unmasked-wallet-cards',
-      '--disable-speech-api',
-      '--hide-scrollbars',
-      '--mute-audio',
-      '--disable-extensions',
       '--disable-dev-shm-usage',
-      '--disable-accelerated-2d-canvas',
-      '--no-first-run',
-      '--no-default-browser-check',
-      '--no-pings',
-      '--password-store=basic',
-      '--use-mock-keychain',
-      '--no-zygote',
-      '--single-process',
+      '--disable-extensions',
       '--disable-gpu',
+      '--disable-offer-store-unmasked-wallet-cards',
+      '--disable-offline-load-stale-cache',
+      '--disable-popup-blocking',
+      '--disable-setuid-sandbox',
+      '--disable-site-isolation-trials', // https://superuser.com/questions/654565/how-to-run-google-chrome-in-a-single-process
+      '--disable-speech-api',
+      '--disable-sync',
+      '--disable-translate',
+      '--disable-web-security',
+      '--disk-cache-size=0',
+      '--hide-scrollbars',
+      '--ignore-certificate-errors',
+      '--ignore-ssl-errors',
+      '--in-process-gpu', // https://superuser.com/questions/654565/how-to-run-google-chrome-in-a-single-process
+      '--metrics-recording-only',
+      '--mute-audio',
+      '--no-default-browser-check',
+      '--no-first-run',
+      '--no-pings',
+      '--no-sandbox',
+      '--no-zygote',
+      '--password-store=basic',
+      '--renderer-process-limit=2', // https://superuser.com/questions/654565/how-to-run-google-chrome-in-a-single-process
+      '--safebrowsing-disable-auto-update',
+      '--single-process',
+      '--use-mock-keychain',
     ];
   }
 

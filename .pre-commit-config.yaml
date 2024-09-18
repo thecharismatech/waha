@@ -2,16 +2,26 @@ exclude: |
   (?x)^(
     ^src/dashboard/.*|
     ^src/core/engines/webjs/.*html|
-    ^src/plus/engines/webjs/.*html
+    ^src/plus/engines/webjs/.*html|
+    ^.yarn/.*
   )$
 
 repos:
   - repo: local
     hooks:
+      - id: commit-message-prefix
+        name: Validate Commit Message for src/plus Changes
+        entry: python ./.precommit/validate_commit_message.py
+        language: python
+        stages: [commit-msg]
+
+  - repo: local
+    hooks:
       - id: lint
+        stages: [pre-commit]
         name: lint
         language: system
-        entry: bash -c '$HOME/.nvm/nvm-exec npm run lint'
+        entry: bash -c '$HOME/.nvm/nvm-exec npm run lint-cache'
         pass_filenames: false
         files: |
           (?x)^(
@@ -22,6 +32,7 @@ repos:
     rev: 'v3.1.0'
     hooks:
       - id: prettier
+        stages: [pre-commit]
         exclude: |
           (?x)^(
               docs/.*|
@@ -31,11 +42,13 @@ repos:
     rev: v1.1.2
     hooks:
       - id: markdown-toc
+        stages: [pre-commit]
         name: README.md
         files: ^README.md$
   - repo: local
     hooks:
       - id: no-plus-in-core
+        stages: [pre-commit]
         name: No "plus" in core
         language: pygrep
         entry: 'plus'
@@ -50,11 +63,13 @@ repos:
   - repo: local
     hooks:
       - id: no-console-log
+        stages: [pre-commit]
         name: No console.log() calls
         language: pygrep
         entry: 'console\.log'
         exclude: |
           (?x)^(
+              entrypoint.sh|
               .pre-commit-config.yaml|
               ^src/core/engines/webjs/session.webjs.core.ts|
           )$

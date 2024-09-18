@@ -3,6 +3,8 @@ import { ApiExtraModels, ApiProperty, getSchemaPath } from '@nestjs/swagger';
 import {
   BinaryFile,
   RemoteFile,
+  VideoBinaryFile,
+  VideoRemoteFile,
   VoiceBinaryFile,
   VoiceRemoteFile,
 } from './files.dto';
@@ -19,48 +21,48 @@ class StatusRequest {
 }
 
 export class TextStatus extends StatusRequest {
-  text = 'Have a look! https://github.com/';
-  backgroundColor = '#38b42f';
-  font = 1;
+  text: string = 'Have a look! https://github.com/';
+  backgroundColor: string = '#38b42f';
+  font: number = 1;
 }
 
-@ApiExtraModels(BinaryFile, RemoteFile)
+@ApiExtraModels(RemoteFile, BinaryFile)
 export class ImageStatus extends StatusRequest {
   @ApiProperty({
     oneOf: [
-      { $ref: getSchemaPath(BinaryFile) },
       { $ref: getSchemaPath(RemoteFile) },
+      { $ref: getSchemaPath(BinaryFile) },
     ],
   })
-  file: BinaryFile | RemoteFile;
+  file: RemoteFile | BinaryFile;
 
-  caption: string;
+  caption?: string;
 }
 
-@ApiExtraModels(VoiceBinaryFile, VoiceRemoteFile)
+@ApiExtraModels(VoiceRemoteFile, VoiceBinaryFile)
 export class VoiceStatus extends StatusRequest {
   @ApiProperty({
     oneOf: [
-      { $ref: getSchemaPath(VoiceBinaryFile) },
       { $ref: getSchemaPath(VoiceRemoteFile) },
+      { $ref: getSchemaPath(VoiceBinaryFile) },
     ],
   })
-  file: VoiceBinaryFile | VoiceRemoteFile;
+  file: VoiceRemoteFile | VoiceBinaryFile;
 
-  backgroundColor = '#38b42f';
+  backgroundColor: string = '#38b42f';
 }
 
-@ApiExtraModels(BinaryFile, RemoteFile)
+@ApiExtraModels(VideoRemoteFile, VideoBinaryFile)
 export class VideoStatus extends StatusRequest {
   @ApiProperty({
     oneOf: [
-      { $ref: getSchemaPath(BinaryFile) },
-      { $ref: getSchemaPath(RemoteFile) },
+      { $ref: getSchemaPath(VideoRemoteFile) },
+      { $ref: getSchemaPath(VideoBinaryFile) },
     ],
   })
-  file: BinaryFile | RemoteFile;
+  file: VideoRemoteFile | VideoBinaryFile;
 
-  caption: string;
+  caption?: string;
 }
 
 export class DeleteStatusRequest extends StatusRequest {

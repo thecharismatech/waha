@@ -1,7 +1,10 @@
+*.heapsnapshot
 .yarn
 example.ts
 .*sessions
 .secrets
+.minio
+.media
 tokens
 files
 venv
@@ -11,6 +14,7 @@ src/test.js
 test.js
 .wwebjs_cache
 src/dashboard
+.eslintcache
 
 # compiled output
 /dist

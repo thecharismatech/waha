@@ -1,4 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { WAMedia } from '@waha/structures/media.dto';
+import { ReplyToMessage } from '@waha/structures/message.dto';
 
 import { WAMessageAck } from './enums.dto';
 import { ChatIdProperty, MessageIdProperty } from './properties.dto';
@@ -7,27 +9,6 @@ export class WALocation {
   description?: string;
   latitude: string;
   longitude: string;
-}
-
-export class WAMedia {
-  @ApiProperty({
-    description: 'The URL for the media in the message if any',
-    example:
-      'http://localhost:3000/api/files/false_11111111111@c.us_AAAAAAAAAAAAAAAAAAAA.oga',
-  })
-  url: string;
-
-  @ApiProperty({
-    description: 'mimetype for the media in the message if any',
-    example: 'audio/jpeg',
-  })
-  mimetype?: string;
-
-  @ApiProperty({
-    description: 'The original filename in mediaUrl in the message if any',
-    example: 'example.pdf',
-  })
-  filename?: string;
 }
 
 class WAMessageBase {
@@ -78,7 +59,10 @@ export class WAMessage extends WAMessageBase {
   })
   hasMedia: boolean;
 
-  media?: WAMedia = null;
+  @ApiProperty({
+    description: 'Media object for the message if any and downloaded',
+  })
+  media?: WAMedia;
 
   @ApiProperty({
     description:
@@ -115,6 +99,8 @@ export class WAMessage extends WAMessageBase {
     description: 'List of vCards contained in the message.',
   })
   vCards?: string[];
+
+  replyTo?: ReplyToMessage;
 
   /** Returns message in a raw format */
   @ApiProperty({

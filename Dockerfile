@@ -1,14 +1,16 @@
 #
 # Build
 #
-ARG NODE_VERSION=20.12.2-bullseye
-FROM node:${NODE_VERSION} as build
+ARG NODE_VERSION=22.8-bullseye
+FROM node:${NODE_VERSION} AS build
 ENV PUPPETEER_SKIP_DOWNLOAD=True
 
 # npm packages
 WORKDIR /src
 COPY package.json .
 COPY yarn.lock .
+ENV YARN_CHECKSUM_BEHAVIOR=update
+RUN npm install -g corepack && corepack enable
 RUN yarn set version 3.6.3
 RUN yarn install
 
@@ -21,10 +23,10 @@ RUN yarn build && find ./dist -name "*.d.ts" -delete
 #
 # Dashboard
 #
-FROM node:${NODE_VERSION} as dashboard
+FROM node:${NODE_VERSION} AS dashboard
 
 # Download WAHA Dashboard
-ENV WAHA_DASHBOARD_SHA 63fd6e9e23e90f90e8aa0de04feb3f1909f63021
+ENV WAHA_DASHBOARD_SHA 92dc0b84de69d8c126ecf6fc6bb469d8c7fa291f
 RUN \
     wget https://github.com/devlikeapro/dashboard/archive/${WAHA_DASHBOARD_SHA}.zip \
     && unzip ${WAHA_DASHBOARD_SHA}.zip -d /tmp/dashboard \
@@ -36,7 +38,7 @@ RUN \
 #
 # Final
 #
-FROM node:${NODE_VERSION} as release
+FROM node:${NODE_VERSION} AS release
 ENV PUPPETEER_SKIP_DOWNLOAD=True
 # Quick fix for memory potential memory leaks
 # https://github.com/devlikeapro/waha/issues/347
@@ -86,6 +88,7 @@ COPY package.json ./
 COPY --from=build /src/node_modules ./node_modules
 COPY --from=build /src/dist ./dist
 COPY --from=dashboard /dashboard ./dist/dashboard
+COPY entrypoint.sh /entrypoint.sh
 
 # Chokidar options to monitor file changes
 ENV CHOKIDAR_USEPOLLING=1
@@ -96,4 +99,4 @@ ENV WAHA_ZIPPER=ZIPUNZIP
 
 # Run command, etc
 EXPOSE 3000
-CMD yarn start:prod
+CMD ["/entrypoint.sh"]

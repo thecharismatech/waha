@@ -15,4 +15,24 @@ function MessageIdProperty() {
   });
 }
 
-export { ChatIdProperty, MessageIdProperty };
+function MessageIdOnlyProperty() {
+  return ApiProperty({
+    description: 'Message ID',
+    example: 'AAAAAAAAAAAAAAAAAAAA',
+  });
+}
+
+function ReplyToProperty() {
+  return ApiProperty({
+    description:
+      'The ID of the message to reply to - false_11111111111@c.us_AAAAAAAAAAAAAAAAAAAA',
+    example: null,
+  });
+}
+
+export {
+  ChatIdProperty,
+  MessageIdOnlyProperty,
+  MessageIdProperty,
+  ReplyToProperty,
+};

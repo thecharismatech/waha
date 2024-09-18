@@ -8,5 +8,9 @@ export abstract class ISessionConfigRepository {
 
   abstract get(sessionName: string): Promise<SessionConfig | null>;
 
+  abstract exists(sessionName: string): Promise<boolean>;
+
   abstract delete(sessionName: string): Promise<void>;
+
+  abstract getAll(): Promise<string[]>;
 }
